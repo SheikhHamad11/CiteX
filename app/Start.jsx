@@ -72,7 +72,7 @@ export default function index() {
     >
       <View>
         <View className="flex flex-row justify-center items-center mx-2 mt-5">
-          <Text className="mt-2 ml-4  font-bold text-black text-xl dark:text-white ">
+          <Text className="mt-2 ml-4  font-bold  text-xl text-white ">
             Question Number {"" + currentIndex + " / " + quizes?.length}
           </Text>
         </View>

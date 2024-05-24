@@ -2,15 +2,20 @@ import React, { useCallback, useEffect, useRef, useState } from "react";
 import { View, Animated, PanResponder, StyleSheet, Text } from "react-native";
 const symbols = ["<", ">", ",", "(", ")", ".", "{", "}", ":", ";", "!"];
 
-const DragableItem = ({ value, setMeasure, ref, onDrop, measure, item }) => {
+const DragableItem = ({ value, setMeasure, ref, onDrop, measure, item,measure2 }) => {
   const pan = useRef(new Animated.ValueXY()).current;
 
   const viewRef = useRef();
   const measureRef = useRef();
+  const measureRef2 = useRef();
   useEffect(() => {
     measureRef.current = measure;
     // console.log({ measure });
   }, [measure]);
+  useEffect(() => {
+    measureRef2.current = measure2;
+    // console.log({ measure });
+  }, [measure2]);
 
   // const updateMeasure = () => {
   //   if (viewRef.current) {
@@ -36,7 +41,9 @@ const DragableItem = ({ value, setMeasure, ref, onDrop, measure, item }) => {
         // console.log("Measurement:", measure);
 
         const { startX, startY, endX, endY } = measureRef.current;
+        const { startX2, startY2, endX2, endY2 } = measureRef2.current;
         console.log({ startX, endX, startY, endY });
+        console.log({ startX2, endX2, startY2, endY2 });
         console.log(gestureState.moveX, gestureState.moveY);
         if (
           measureRef.current &&
@@ -44,6 +51,14 @@ const DragableItem = ({ value, setMeasure, ref, onDrop, measure, item }) => {
           gestureState.moveX < endX &&
           gestureState.moveY > startY &&
           gestureState.moveY < endY
+        ) {
+          onDrop(gestureState.moveX, gestureState.moveY, value);
+        }else if (
+          measureRef2.current &&
+          gestureState.moveX > startX2 &&
+          gestureState.moveX < endX2 &&
+          gestureState.moveY > startY2 &&
+          gestureState.moveY < endY2
         ) {
           onDrop(gestureState.moveX, gestureState.moveY, value);
         } else {

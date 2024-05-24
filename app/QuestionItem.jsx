@@ -7,6 +7,7 @@ import {
   StyleSheet,
 } from "react-native";
 import DragableItem from "./DragableItem";
+import DropBox from "../components/DropBox";
 const { width } = Dimensions.get("window");
 // const symbols = ["<", ">", ",", "(", ")", ".", "{", "}", ":", ";", "!"];
 const symbols = ["<", ">", ","];
@@ -85,14 +86,13 @@ export default function QuestionItem({ data }) {
             item={item}
             value="Drag Me one more time!"
             measure={measure}
+            measure2={measure2}
             // setMeasure={setMeasure}
             onDrop={handleDrop}
           />
         ))}
 
-        <View ref={viewRef} style={styles.dropZone}>
-          <Text style={styles.dropZoneText}>Drop Here1</Text>
-        </View>
+        <DropBox viewRef={viewRef} />
         <View ref={view2Ref} style={styles.dropZone}>
           <Text style={styles.dropZoneText}>Drop Here2</Text>
         </View>
