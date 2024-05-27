@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import {
   View,
   Text,
@@ -7,57 +7,53 @@ import {
   StyleSheet,
 } from "react-native";
 import DragableItem from "./DragableItem";
-import DropBox from "../components/DropBox";
+
 const { width } = Dimensions.get("window");
 // const symbols = ["<", ">", ",", "(", ")", ".", "{", "}", ":", ";", "!"];
 const symbols = ["<", ">", ","];
+
 export default function QuestionItem({ data }) {
   const [droppedValue, setDroppedValue] = useState(null);
-  const [measure, setMeasure] = useState({});
-  const [measure2, setMeasure2] = useState({});
-
-  const viewRef = useRef();
-  const view2Ref = useRef();
+  const [measure, setMeasure] = useState([]);
+  const viewRefs = useRef([]);
+  const viewRefs2 = useRef([]);
 
   useEffect(() => {
-    if (viewRef.current) {
-      viewRef.current.measure((x, y, width, height, pageX, pageY) => {
-        const startX = pageX;
-        const startY = pageY;
-        console.log(pageY);
-        const endX = pageX + width;
-        const endY = pageY + height;
-        setMeasure({ startX, startY, endX, endY });
-      });
+    // Initialize the refs array based on the length of data.blank
+    if (data?.blank) {
+      viewRefs2.current = data.blank.map((_, i) => 
+        {
+          if(viewRefs.current[i]) 
+            return viewRefs.current[i]
+
+        }
+    );
     }
-    if (view2Ref.current) {
-      view2Ref.current.measure((x, y, width, height, pageX, pageY) => {
-        const startX = pageX;
-        const startY = pageY;
-        const endX = pageX + width;
-        const endY = pageY + height;
-        setMeasure2({ startX, startY, endX, endY });
-      });
-    }
-  }, []);
+    console.log(viewRefs2.current)
+    // Measure the positions
+    viewRefs.current.forEach((ref, i) => {
+      if (ref.current) {
+        ref.current.measure((x, y, width, height, pageX, pageY) => {
+          const startX = pageX;
+          const startY = pageY;
+          const endX = pageX + width;
+          const endY = pageY + height;
+          setMeasure((prev) => [
+            ...prev,
+            { index: i, startX, startY, endX, endY },
+          ]);
+        });
+      }
+    });
+  }, [data?.blank]);
 
   const handleDrop = (x, y, value) => {
     console.log(value, x, y); // Debugging
-
-    const { startX, startY, endX, endY } = measure;
-    const {
-      startX: startX2,
-      startY: startY2,
-      endX: endX2,
-      endY: endY2,
-    } = measure2;
-
-    if (
-      !(x > startX && x < endX && y > startY && y < endY) ||
-      !(x > startX2 && x < endX2 && y > startY2 && y < endY2)
-    ) {
-      setDroppedValue(value);
-    }
+    measure.forEach(({ startX, startY, endX, endY }) => {
+      if (x > startX && x < endX && y > startY && y < endY) {
+        setDroppedValue(value);
+      }
+    });
   };
 
   return (
@@ -86,16 +82,9 @@ export default function QuestionItem({ data }) {
             item={item}
             value="Drag Me one more time!"
             measure={measure}
-            measure2={measure2}
-            // setMeasure={setMeasure}
             onDrop={handleDrop}
           />
         ))}
-
-        <DropBox viewRef={viewRef} />
-        <View ref={view2Ref} style={styles.dropZone}>
-          <Text style={styles.dropZoneText}>Drop Here2</Text>
-        </View>
       </View>
 
       <View
@@ -134,22 +123,39 @@ export default function QuestionItem({ data }) {
         ))}
       </View>
       <View
-        style={[styles.textContainer]}
-        className="flex-row justify-center  flex-wrap"
+        style={styles.textContainer}
       >
-        {data?.blank?.map((item, index) => (
-          <Text
-            key={index}
-            style={{
-              color: "white",
-              marginHorizontal: 10,
-              textAlign: "justify",
-              marginTop: 10,
-            }}
-          >
-            {item}
-          </Text>
-        ))}
+        {data?.blank?.map((item, index) => {
+          if (item.indexOf("_") !== -1) {
+            return (
+              <Text
+                key={index}
+                ref={viewRefs.current[index]}
+                style={{
+                  color: "white",
+                  marginHorizontal: 10,
+                  textAlign: "justify",
+                  marginTop: 10,
+                }}
+              >
+                {item}
+              </Text>
+            );
+          }
+          return (
+            <Text
+              key={index}
+              style={{
+                color: "white",
+                marginHorizontal: 10,
+                textAlign: "justify",
+                marginTop: 10,
+              }}
+            >
+              {item}
+            </Text>
+          );
+        })}
       </View>
     </View>
   );
@@ -161,7 +167,13 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     alignItems: "center",
   },
-  textContainer: {},
+  textContainer: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    justifyContent: "center",
+    marginTop: 3,
+    width: width,
+  },
   dropZone: {
     width: 50,
     height: 50,
